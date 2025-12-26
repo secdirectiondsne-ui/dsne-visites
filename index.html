@@ -244,7 +244,6 @@
                     <thead>
                         <tr>
                             <th>Horodateur</th>
-                            <th>Adresse e-mail</th>
                             <th>Nom de Famille</th>
                             <th>Prenom</th>
                             <th>Service Visite</th>
@@ -259,7 +258,7 @@
                     </thead>
                     <tbody id="dataBody">
                         <tr>
-                            <td colspan="12" style="text-align:center;">Chargement des donnees...</td>
+                            <td colspan="11" style="text-align:center;">Chargement des donnees...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -271,9 +270,6 @@
     <script>
         const SHEET_ID = '1VGUm9KutnebwPBJCeOu9sa6sUY8w2kp9jEDY8u_Aj6Q';
         const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
-
-        // Store visit statuses in memory
-        let visitStatuses = {};
 
         async function fetchAndDisplayData() {
             const tbody = document.getElementById('dataBody');
@@ -300,7 +296,7 @@
             }
         }
 
-        function displayData(data) {
+        async function displayData(data) {
             const tbody = document.getElementById('dataBody');
             
             if (data.length === 0) {
@@ -310,17 +306,41 @@
 
             tbody.innerHTML = '';
             
-            data.forEach((row, index) => {
-                // Create unique ID for each visit
-                const visitId = `visit_${index}_${row['Horodateur']}`;
+            for (let index = 0; index < data.length; index++) {
+                const row = data[index];
+                // Create unique ID for each visit based on timestamp and card number
+                const visitId = `visit_${row['Horodateur']}_${row['Numero de Carte Visite']}`.replace(/[^a-zA-Z0-9]/g, '_');
                 
-                // Get status from memory, default to 'en-utilisation'
-                const status = visitStatuses[visitId] || 'en-utilisation';
+                // Try to get status from storage
+                let statusData = null;
+                try {
+                    const stored = await window.storage.get(visitId, false);
+                    if (stored && stored.value) {
+                        statusData = JSON.parse(stored.value);
+                    }
+                } catch (error) {
+                    // Key doesn't exist yet
+                    console.log('No stored data for:', visitId);
+                }
+                
+                const status = statusData ? statusData.status : 'en-utilisation';
+                const remiseTime = statusData ? statusData.timestamp : 'N/A';
+                
+                // Determine card color based on service name
+                const service = (row['Service Visite'] || row['Service Visité'] || '').toLowerCase();
+                let carteClass = 'carte-default';
+                
+                if (service.includes('direction')) {
+                    carteClass = 'carte-direction';
+                } else if (service.includes('comptabilit')) {  // matches comptabilité and comptabilite
+                    carteClass = 'carte-comptabilite';
+                } else if (service.includes('ressources humaines') || service.includes('rh')) {
+                    carteClass = 'carte-rh';
+                }
                 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><button class="data-button">${row['Horodateur'] || ''}</button></td>
-                    <td><button class="data-button">${row['Adresse e-mail'] || ''}</button></td>
                     <td><button class="data-button">${row['Nom de Famille'] || ''}</button></td>
                     <td><button class="data-button">${row['Prenom'] || ''}</button></td>
                     <td><button class="data-button">${row['Service Visite'] || row['Service Visité'] || ''}</button></td>
@@ -333,6 +353,9 @@
                             ${status === 'remise' ? 'Remise' : 'En utilisation'}
                         </div>
                     </td>
+                    <td id="time_${visitId}">
+                        <button class="data-button">${remiseTime}</button>
+                    </td>
                     <td>
                         <button class="remise-button" 
                                 id="btn_${visitId}" 
@@ -343,25 +366,52 @@
                     </td>
                 `;
                 tbody.appendChild(tr);
-            });
+            }
         }
 
-        function markAsRemise(visitId) {
-            // Update status in memory
-            visitStatuses[visitId] = 'remise';
+        async function markAsRemise(visitId) {
+            // Get current timestamp
+            const now = new Date();
+            const timestamp = now.toLocaleString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
             
-            // Update UI
-            const statusElement = document.getElementById(`status_${visitId}`);
-            const buttonElement = document.getElementById(`btn_${visitId}`);
+            // Save to storage
+            const statusData = {
+                status: 'remise',
+                timestamp: timestamp
+            };
             
-            if (statusElement) {
-                statusElement.className = 'status-remise';
-                statusElement.textContent = 'Remise';
-            }
-            
-            if (buttonElement) {
-                buttonElement.disabled = true;
-                buttonElement.textContent = 'Remise';
+            try {
+                const result = await window.storage.set(visitId, JSON.stringify(statusData), false);
+                console.log('Saved to storage:', result);
+                
+                // Update UI
+                const statusElement = document.getElementById(`status_${visitId}`);
+                const buttonElement = document.getElementById(`btn_${visitId}`);
+                const timeElement = document.getElementById(`time_${visitId}`);
+                
+                if (statusElement) {
+                    statusElement.className = 'status-remise';
+                    statusElement.textContent = 'Remise';
+                }
+                
+                if (timeElement) {
+                    timeElement.innerHTML = `<button class="data-button">${timestamp}</button>`;
+                }
+                
+                if (buttonElement) {
+                    buttonElement.disabled = true;
+                    buttonElement.textContent = 'Remise';
+                }
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde:', error);
+                alert('Erreur lors de la sauvegarde du statut: ' + error.message);
             }
         }
 
