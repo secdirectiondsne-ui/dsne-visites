@@ -135,7 +135,6 @@
         }
 
         .carte-button {
-            background-color: #DC143C;
             color: white;
             border: none;
             padding: 8px 16px;
@@ -146,9 +145,25 @@
             font-size: 14px;
             font-weight: bold;
         }
+        
+        .carte-direction {
+            background-color: #394e9c;
+        }
+        
+        .carte-comptabilite {
+            background-color: #79605a;
+        }
+        
+        .carte-rh {
+            background-color: #c92d00;
+        }
+        
+        .carte-default {
+            background-color: #DC143C;
+        }
 
         .status-en-utilisation {
-            background-color: #FFA500;
+            background-color: #DC143C;
             color: white;
             padding: 8px 16px;
             border-radius: 4px;
@@ -311,7 +326,7 @@
                     <td><button class="data-button">${row['Service Visite'] || row['Service Visité'] || ''}</button></td>
                     <td><button class="data-button">${row['CIN/NIF'] || ''}</button></td>
                     <td><button class="data-button">${row['Institution'] || ''}</button></td>
-                    <td><button class="carte-button">${row['Numero de Carte Visite'] || ''}</button></td>
+                    <td><button class="carte-button ${carteClass}">${row['Numero de Carte Visite'] || ''}</button></td>
                     <td><button class="data-button">${row['Nom de La Formation'] || ''}</button></td>
                     <td>
                         <div class="status-${status}" id="status_${visitId}">
