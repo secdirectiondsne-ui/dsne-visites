@@ -18,16 +18,46 @@
         }
 
         .header {
-            background-color: white;
+            background-color: #4CAF50;
             padding: 20px 40px;
-            text-align: right;
-            border-bottom: 2px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #45a049;
         }
 
         .header h2 {
-            color: #333;
-            font-size: 18px;
+            color: white;
+            font-size: 20px;
             font-weight: bold;
+        }
+
+        .nav-menu {
+            background-color: #f5f5f5;
+            padding: 15px 40px;
+            display: flex;
+            gap: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .nav-menu a {
+            color: #333;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .nav-menu a:hover {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .nav-menu a.active {
+            background-color: #4CAF50;
+            color: white;
         }
 
         .container {
@@ -49,6 +79,11 @@
             border-radius: 8px;
             margin-bottom: 40px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .section.active {
+            display: block;
         }
 
         .section h2 {
@@ -206,15 +241,19 @@
 </head>
 <body>
     <div class="header">
-        <h2>RECEPTION | DIRECTION SANITAIRE DU NORD-EST</h2>
+        <h2>PORTAIL DE RECEPTION</h2>
+        <h2>DSNE</h2>
+    </div>
+
+    <div class="nav-menu">
+        <a href="#" class="nav-link active" data-section="enregistrement">Enregistrement de Visites</a>
+        <a href="#" class="nav-link" data-section="registre">Registre de Visites</a>
     </div>
 
     <div class="container">
-        <h1>Enregistrement de Visites</h1>
-
         <!-- Enregistrement Section -->
-        <div class="section">
-            <h2>Enregistrement de Visites</h2>
+        <div class="section active" id="enregistrement">
+            <h1>Enregistrement de Visites</h1>
             
             <div class="button-container">
                 <a href="https://forms.gle/spcQtQZDVzgBPmbQ9" class="main-button" target="_blank">
@@ -236,8 +275,8 @@
         </div>
 
         <!-- Registre Section -->
-        <div class="section">
-            <h2>Registre de Visite</h2>
+        <div class="section" id="registre">
+            <h1>Registre de Visite</h1>
             
             <div class="table-container">
                 <table>
@@ -270,6 +309,29 @@
     <script>
         const SHEET_ID = '1VGUm9KutnebwPBJCeOu9sa6sUY8w2kp9jEDY8u_Aj6Q';
         const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+
+        // Navigation functionality
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all links and sections
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                
+                // Add active class to clicked link
+                this.classList.add('active');
+                
+                // Show corresponding section
+                const sectionId = this.getAttribute('data-section');
+                document.getElementById(sectionId).classList.add('active');
+                
+                // Load data if registre section is opened
+                if (sectionId === 'registre') {
+                    fetchAndDisplayData();
+                }
+            });
+        });
 
         async function fetchAndDisplayData() {
             const tbody = document.getElementById('dataBody');
@@ -319,7 +381,6 @@
                         statusData = JSON.parse(stored);
                     }
                 } catch (error) {
-                    // Key doesn't exist yet
                     console.log('No stored data for:', visitId);
                 }
                 
@@ -332,22 +393,25 @@
                 
                 if (service.includes('direction')) {
                     carteClass = 'carte-direction';
-                } else if (service.includes('comptabilit')) {  // matches comptabilité and comptabilite
+                } else if (service.includes('comptabilit')) {
                     carteClass = 'carte-comptabilite';
                 } else if (service.includes('ressources humaines') || service.includes('rh')) {
                     carteClass = 'carte-rh';
                 }
                 
+                // Helper function to get value or N/A
+                const getValue = (value) => value && value.trim() !== '' ? value : 'N/A';
+                
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><button class="data-button">${row['Horodateur'] || ''}</button></td>
-                    <td><button class="data-button">${row['Nom de Famille'] || ''}</button></td>
-                    <td><button class="data-button">${row['Prenom'] || ''}</button></td>
-                    <td><button class="data-button">${row['Service Visite'] || row['Service Visité'] || ''}</button></td>
-                    <td><button class="data-button">${row['CIN/NIF'] || ''}</button></td>
-                    <td><button class="data-button">${row['Institution'] || ''}</button></td>
-                    <td><button class="carte-button ${carteClass}">${row['Numero de Carte Visite'] || ''}</button></td>
-                    <td><button class="data-button">${row['Nom de La Formation'] || ''}</button></td>
+                    <td><button class="data-button">${getValue(row['Horodateur'])}</button></td>
+                    <td><button class="data-button">${getValue(row['Nom de Famille'])}</button></td>
+                    <td><button class="data-button">${getValue(row['Prenom'])}</button></td>
+                    <td><button class="data-button">${getValue(row['Service Visite'] || row['Service Visité'])}</button></td>
+                    <td><button class="data-button">${getValue(row['CIN/NIF'])}</button></td>
+                    <td><button class="data-button">${getValue(row['Institution'])}</button></td>
+                    <td><button class="carte-button ${carteClass}">${getValue(row['Numero de Carte Visite'])}</button></td>
+                    <td><button class="data-button">${getValue(row['Nom de La Formation'])}</button></td>
                     <td>
                         <div class="status-${status}" id="status_${visitId}">
                             ${status === 'remise' ? 'Remise' : 'En utilisation'}
@@ -370,7 +434,6 @@
         }
 
         async function markAsRemise(visitId) {
-            // Get current timestamp
             const now = new Date();
             const timestamp = now.toLocaleString('fr-FR', {
                 day: '2-digit',
@@ -381,7 +444,6 @@
                 second: '2-digit'
             });
             
-            // Save to storage
             const statusData = {
                 status: 'remise',
                 timestamp: timestamp
@@ -391,7 +453,6 @@
                 localStorage.setItem(visitId, JSON.stringify(statusData));
                 console.log('Saved to storage:', visitId);
                 
-                // Update UI
                 const statusElement = document.getElementById(`status_${visitId}`);
                 const buttonElement = document.getElementById(`btn_${visitId}`);
                 const timeElement = document.getElementById(`time_${visitId}`);
@@ -415,11 +476,13 @@
             }
         }
 
-        // Load data when page loads
-        window.addEventListener('DOMContentLoaded', fetchAndDisplayData);
-        
-        // Refresh data every 30 seconds
-        setInterval(fetchAndDisplayData, 30000);
+        // Refresh data every 30 seconds only if registre section is active
+        setInterval(() => {
+            if (document.getElementById('registre').classList.contains('active')) {
+                fetchAndDisplayData();
+            }
+        }, 30000);
     </script>
 </body>
 </html>
+
