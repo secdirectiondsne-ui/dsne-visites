@@ -95,6 +95,10 @@
         .button-container {
             text-align: center;
             margin: 30px 0;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         .main-button {
@@ -112,6 +116,29 @@
 
         .main-button:hover {
             background-color: #45a049;
+        }
+
+        .presence-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px 50px;
+            font-size: 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 200px;
+        }
+
+        .presence-button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .presence-button.active {
+            background-color: #2e7d32;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .steps {
@@ -167,6 +194,32 @@
             width: 100%;
             border-radius: 4px;
             font-size: 14px;
+        }
+
+        .entree-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            text-align: center;
+            display: block;
+            width: 100%;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .sortie-button {
+            background-color: #9C27B0;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            text-align: center;
+            display: block;
+            width: 100%;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
         }
 
         .carte-button {
@@ -237,6 +290,14 @@
         tr:hover {
             background-color: #f9f9f9;
         }
+
+        .presence-data {
+            display: none;
+        }
+
+        .presence-data.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -248,6 +309,7 @@
     <div class="nav-menu">
         <a href="#" class="nav-link active" data-section="enregistrement">Enregistrement de Visites</a>
         <a href="#" class="nav-link" data-section="registre">Registre de Visites</a>
+        <a href="#" class="nav-link" data-section="presence">Registre de Presence</a>
     </div>
 
     <div class="container">
@@ -303,12 +365,72 @@
                 </table>
             </div>
         </div>
+
+        <!-- Presence Section -->
+        <div class="section" id="presence">
+            <h1>Registre de Presence</h1>
+            
+            <div class="button-container">
+                <button class="presence-button active" onclick="showPresenceData('dsne')">DSNE</button>
+                <button class="presence-button" onclick="showPresenceData('cmso')">CMSO</button>
+            </div>
+
+            <!-- DSNE Presence Data -->
+            <div class="presence-data active" id="presence-dsne">
+                <h2 style="text-align: center; margin: 20px 0;">DSNE - Registre de Presence</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Prenom</th>
+                                <th>Heure d'Entree</th>
+                                <th>Heure de Sortie</th>
+                            </tr>
+                        </thead>
+                        <tbody id="presenceDsneBody">
+                            <tr>
+                                <td colspan="4" style="text-align:center;">Chargement des donnees...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CMSO Presence Data -->
+            <div class="presence-data" id="presence-cmso">
+                <h2 style="text-align: center; margin: 20px 0;">CMSO - Registre de Presence</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Prenom</th>
+                                <th>Heure d'Entree</th>
+                                <th>Heure de Sortie</th>
+                            </tr>
+                        </thead>
+                        <tbody id="presenceCmsoBody">
+                            <tr>
+                                <td colspan="4" style="text-align:center;">Chargement des donnees...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script>
         const SHEET_ID = '1VGUm9KutnebwPBJCeOu9sa6sUY8w2kp9jEDY8u_Aj6Q';
         const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+        
+        const DSNE_SHEET_ID = '1Oj_77Y85kIxcaVnr6U6L5ZXyuhCoS1_d1IrcymGTkTY';
+        const DSNE_CSV_URL = `https://docs.google.com/spreadsheets/d/${DSNE_SHEET_ID}/export?format=csv`;
+        
+        const CMSO_SHEET_ID = '1xE1Em9TL698GoqbJLshH-Cp8aF35-kswk8jfYnTlk0M';
+        const CMSO_CSV_URL = `https://docs.google.com/spreadsheets/d/${CMSO_SHEET_ID}/export?format=csv`;
 
         // Navigation functionality
         document.querySelectorAll('.nav-link').forEach(link => {
@@ -326,12 +448,110 @@
                 const sectionId = this.getAttribute('data-section');
                 document.getElementById(sectionId).classList.add('active');
                 
-                // Load data if registre section is opened
+                // Load data based on section
                 if (sectionId === 'registre') {
                     fetchAndDisplayData();
+                } else if (sectionId === 'presence') {
+                    fetchPresenceData('dsne');
                 }
             });
         });
+
+        function showPresenceData(type) {
+            // Update button states
+            document.querySelectorAll('.presence-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Hide all presence data
+            document.querySelectorAll('.presence-data').forEach(data => {
+                data.classList.remove('active');
+            });
+            
+            // Show selected presence data
+            document.getElementById(`presence-${type}`).classList.add('active');
+            
+            // Fetch data
+            fetchPresenceData(type);
+        }
+
+        async function fetchPresenceData(type) {
+            const url = type === 'dsne' ? DSNE_CSV_URL : CMSO_CSV_URL;
+            const bodyId = type === 'dsne' ? 'presenceDsneBody' : 'presenceCmsoBody';
+            const tbody = document.getElementById(bodyId);
+            
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Chargement des donnees...</td></tr>';
+
+            try {
+                const response = await fetch(url);
+                const csvText = await response.text();
+                
+                Papa.parse(csvText, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        displayPresenceData(results.data, tbody);
+                    },
+                    error: function(error) {
+                        console.error('Erreur de parsing:', error);
+                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">Erreur lors du chargement des donnees</td></tr>';
+                    }
+                });
+            } catch (error) {
+                console.error('Erreur:', error);
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">Erreur de connexion. Assurez-vous que la feuille est publiee.</td></tr>';
+            }
+        }
+
+        function displayPresenceData(data, tbody) {
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Aucune donnee disponible</td></tr>';
+                return;
+            }
+
+            // Group data by person (Nom + Prenom)
+            const groupedData = {};
+            
+            data.forEach(row => {
+                const nom = row['Nom'] || row['NOM'] || '';
+                const prenom = row['Prenom'] || row['Prénom'] || row['PRENOM'] || '';
+                const type = (row['Type'] || row['TYPE'] || '').toLowerCase();
+                const heure = row['Horodateur'] || row['Heure'] || row['HEURE'] || '';
+                
+                const key = `${nom}_${prenom}`;
+                
+                if (!groupedData[key]) {
+                    groupedData[key] = {
+                        nom: nom,
+                        prenom: prenom,
+                        entree: '',
+                        sortie: ''
+                    };
+                }
+                
+                if (type.includes('entr') || type.includes('entree')) {
+                    groupedData[key].entree = heure;
+                } else if (type.includes('sort') || type.includes('sortie')) {
+                    groupedData[key].sortie = heure;
+                }
+            });
+
+            tbody.innerHTML = '';
+            
+            Object.values(groupedData).forEach(person => {
+                const getValue = (value) => value && value.trim() !== '' ? value : 'N/A';
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><button class="data-button">${getValue(person.nom)}</button></td>
+                    <td><button class="data-button">${getValue(person.prenom)}</button></td>
+                    <td><button class="entree-button">${getValue(person.entree)}</button></td>
+                    <td><button class="sortie-button">${getValue(person.sortie)}</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
 
         async function fetchAndDisplayData() {
             const tbody = document.getElementById('dataBody');
@@ -370,10 +590,8 @@
             
             for (let index = 0; index < data.length; index++) {
                 const row = data[index];
-                // Create unique ID for each visit based on timestamp and card number
                 const visitId = `visit_${row['Horodateur']}_${row['Numero de Carte Visite']}`.replace(/[^a-zA-Z0-9]/g, '_');
                 
-                // Try to get status from storage
                 let statusData = null;
                 try {
                     const stored = localStorage.getItem(visitId);
@@ -387,7 +605,6 @@
                 const status = statusData ? statusData.status : 'en-utilisation';
                 const remiseTime = statusData ? statusData.timestamp : 'N/A';
                 
-                // Determine card color based on service name
                 const service = (row['Service Visite'] || row['Service Visité'] || '').toLowerCase();
                 let carteClass = 'carte-default';
                 
@@ -399,7 +616,6 @@
                     carteClass = 'carte-rh';
                 }
                 
-                // Helper function to get value or N/A
                 const getValue = (value) => value && value.trim() !== '' ? value : 'N/A';
                 
                 const tr = document.createElement('tr');
@@ -476,13 +692,15 @@
             }
         }
 
-        // Refresh data every 30 seconds only if registre section is active
+        // Refresh data every 30 seconds based on active section
         setInterval(() => {
             if (document.getElementById('registre').classList.contains('active')) {
                 fetchAndDisplayData();
+            } else if (document.getElementById('presence').classList.contains('active')) {
+                const activeDsne = document.getElementById('presence-dsne').classList.contains('active');
+                fetchPresenceData(activeDsne ? 'dsne' : 'cmso');
             }
         }, 30000);
     </script>
 </body>
 </html>
-
