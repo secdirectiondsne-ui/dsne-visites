@@ -554,8 +554,10 @@
                     }
                 }
                 
-                const type = (row['Entrée ou Sortie'] || row['Entree ou Sortie'] || '').toLowerCase();
+                const type = (row['Entrée ou Sortie'] || row['Entree ou Sortie'] || '').toLowerCase().trim();
                 const heure = row['Horodateur'] || '';
+                
+                console.log('Processing row:', {nomComplet, type, heure});
                 
                 const key = `${nom}_${prenom}`;
                 
@@ -564,14 +566,44 @@
                         nom: nom,
                         prenom: prenom,
                         entree: '',
-                        sortie: ''
+                        sortie: '',
+                        entreeTime: null,
+                        sortieTime: null
                     };
                 }
                 
+                // Parse the timestamp for comparison
+                const parseDate = (dateStr) => {
+                    try {
+                        // Format: "08/08/2025 13:10:12" or "DD/MM/YYYY HH:MM:SS"
+                        const parts = dateStr.split(' ');
+                        if (parts.length === 2) {
+                            const dateParts = parts[0].split('/');
+                            const timeParts = parts[1].split(':');
+                            // Month is 0-indexed in JavaScript
+                            return new Date(dateParts[2], dateParts[1] - 1, dateParts[0], 
+                                          timeParts[0], timeParts[1], timeParts[2]);
+                        }
+                    } catch (e) {
+                        console.error('Error parsing date:', dateStr, e);
+                    }
+                    return null;
+                };
+                
+                const currentTime = parseDate(heure);
+                
                 if (type.includes('entr')) {
-                    groupedData[key].entree = heure;
+                    // Keep the most recent entry time
+                    if (!groupedData[key].entreeTime || (currentTime && currentTime > groupedData[key].entreeTime)) {
+                        groupedData[key].entree = heure;
+                        groupedData[key].entreeTime = currentTime;
+                    }
                 } else if (type.includes('sort')) {
-                    groupedData[key].sortie = heure;
+                    // Keep the most recent exit time
+                    if (!groupedData[key].sortieTime || (currentTime && currentTime > groupedData[key].sortieTime)) {
+                        groupedData[key].sortie = heure;
+                        groupedData[key].sortieTime = currentTime;
+                    }
                 }
             });
 
