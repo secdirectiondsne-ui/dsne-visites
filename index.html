@@ -1,128 +1,706 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portail de Réception | DSNE</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enregistrement de Visites | DSNE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:Arial,sans-serif;background:#fff;color:#333}
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            color: #333;
+        }
 
-.header{
-    background:#4CAF50;
-    padding:20px 40px;
-    display:flex;
-    justify-content:space-between;
-    color:#fff;
-}
+        .header {
+            background-color: #4CAF50;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #45a049;
+        }
 
-.nav{
-    background:#f5f5f5;
-    padding:15px 40px;
-    display:flex;
-    gap:20px;
-}
+        .header h2 {
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
 
-.nav a{
-    text-decoration:none;
-    color:#333;
-    padding:10px 20px;
-    border-radius:5px;
-}
+        .nav-menu {
+            background-color: #f5f5f5;
+            padding: 15px 40px;
+            display: flex;
+            gap: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
 
-.nav a.active,.nav a:hover{
-    background:#4CAF50;
-    color:white;
-}
+        .nav-menu a {
+            color: #333;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
 
-.container{max-width:1200px;margin:auto;padding:40px}
+        .nav-menu a:hover {
+            background-color: #4CAF50;
+            color: white;
+        }
 
-h1{text-align:center;margin-bottom:30px}
+        .nav-menu a.active {
+            background-color: #4CAF50;
+            color: white;
+        }
 
-.section{display:none}
-.section.active{display:block}
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
 
-.main-btn{
-    display:block;
-    margin:30px auto;
-    padding:15px 40px;
-    font-size:18px;
-    background:#4CAF50;
-    color:white;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-    text-decoration:none;
-    text-align:center;
-}
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 32px;
+            margin-bottom: 40px;
+        }
 
-.presence-buttons{
-    display:flex;
-    justify-content:center;
-    gap:20px;
-    margin-top:40px;
-}
+        .section {
+            background: #f9f9f9;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: none;
+        }
 
-.presence-btn{
-    padding:20px 50px;
-    font-size:20px;
-    background:#4CAF50;
-    color:white;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-}
-</style>
+        .section.active {
+            display: block;
+        }
+
+        .section h2 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .main-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 40px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
+
+        .main-button:hover {
+            background-color: #45a049;
+        }
+
+        .presence-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px 50px;
+            font-size: 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 200px;
+        }
+
+        .presence-button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .presence-button.active {
+            background-color: #2e7d32;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .steps {
+            margin-top: 20px;
+        }
+
+        .step {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .step h3 {
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+            border: 1px solid #ddd;
+        }
+
+        td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .data-button {
+            background-color: #FFD700;
+            color: black;
+            border: none;
+            padding: 8px 16px;
+            text-align: left;
+            display: block;
+            width: 100%;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .entree-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            text-align: center;
+            display: block;
+            width: 100%;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .sortie-button {
+            background-color: #9C27B0;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            text-align: center;
+            display: block;
+            width: 100%;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .carte-button {
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            text-align: left;
+            display: block;
+            width: 100%;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .carte-direction {
+            background-color: #394e9c;
+        }
+        
+        .carte-comptabilite {
+            background-color: #79605a;
+        }
+        
+        .carte-rh {
+            background-color: #c92d00;
+        }
+        
+        .carte-default {
+            background-color: #DC143C;
+        }
+
+        .status-en-utilisation {
+            background-color: #DC143C;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .status-remise {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .remise-button {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .remise-button:hover {
+            background-color: #0b7dda;
+        }
+
+        .remise-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .presence-data {
+            display: none;
+        }
+
+        .presence-data.active {
+            display: block;
+        }
+    </style>
 </head>
-
 <body>
-
-<div class="header">
-    <h2>PORTAIL DE RÉCEPTION</h2>
-    <h2>DSNE</h2>
-</div>
-
-<div class="nav">
-    <a href="#" class="nav-link active" data-section="enregistrement">Enregistrement</a>
-    <a href="#" class="nav-link" data-section="presence">Registre de Présence</a>
-</div>
-
-<div class="container">
-
-<div class="section active" id="enregistrement">
-    <h1>Enregistrement de Visites</h1>
-    <a href="https://forms.gle/spcQtQZDVzgBPmbQ9" target="_blank" class="main-btn">
-        Enregistrer une visite
-    </a>
-</div>
-
-<div class="section" id="presence">
-    <h1>Registre de Présence</h1>
-
-    <div class="presence-buttons">
-        <button class="presence-btn" onclick="window.location.href='presence-dsne.html'">
-            DSNE
-        </button>
-        <button class="presence-btn" disabled style="background:#ccc">
-            CMSO
-        </button>
+    <div class="header">
+        <h2>PORTAIL DE RECEPTION</h2>
+        <h2>DSNE</h2>
     </div>
-</div>
 
-</div>
+    <div class="nav-menu">
+        <a href="#" class="nav-link active" data-section="enregistrement">Enregistrement de Visites</a>
+        <a href="#" class="nav-link" data-section="registre">Registre de Visites</a>
+        <a href="#" class="nav-link" data-section="presence">Registre de Presence</a>
+    </div>
 
-<script>
-document.querySelectorAll('.nav-link').forEach(link=>{
-    link.onclick=e=>{
-        e.preventDefault();
-        document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
-        document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-        link.classList.add('active');
-        document.getElementById(link.dataset.section).classList.add('active');
-    }
-});
-</script>
+    <div class="container">
+        <!-- Enregistrement Section -->
+        <div class="section active" id="enregistrement">
+            <h1>Enregistrement de Visites</h1>
+            
+            <div class="button-container">
+                <a href="https://forms.gle/spcQtQZDVzgBPmbQ9" class="main-button" target="_blank">
+                    Cliquer ici pour enregistrer une visite
+                </a>
+            </div>
 
+            <div class="steps">
+                <div class="step">
+                    <h3>ETAPE 1:</h3>
+                    <p>Cliquez sur le bouton ci-dessus, prenez la pièce d'identité du visiteur et saisissez les informations requises dans le formulaire Google.</p>
+                </div>
+
+                <div class="step">
+                    <h3>ÉTAPE 2:</h3>
+                    <p>Remettez au visiteur la carte correspondant au service visité.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Registre Section -->
+        <div class="section" id="registre">
+            <h1>Registre de Visite</h1>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Horodateur</th>
+                            <th>Nom de Famille</th>
+                            <th>Prenom</th>
+                            <th>Service Visite</th>
+                            <th>CIN/NIF</th>
+                            <th>Institution</th>
+                            <th>Numero de Carte Visite</th>
+                            <th>Nom de La Formation</th>
+                            <th>Status</th>
+                            <th>Heure de Remise</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataBody">
+                        <tr>
+                            <td colspan="11" style="text-align:center;">Chargement des donnees...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Presence Section -->
+        <div class="section" id="presence">
+            <h1>Registre de Presence</h1>
+            
+            <div class="button-container">
+                <button class="presence-button active" onclick="showPresenceData('dsne')">DSNE</button>
+                <button class="presence-button" onclick="showPresenceData('cmso')">CMSO</button>
+            </div>
+
+            <!-- DSNE Presence Data -->
+            <div class="presence-data active" id="presence-dsne">
+                <h2 style="text-align: center; margin: 20px 0;">DSNE - Registre de Presence</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Prenom</th>
+                                <th>Heure d'Entree</th>
+                                <th>Heure de Sortie</th>
+                            </tr>
+                        </thead>
+                        <tbody id="presenceDsneBody">
+                            <tr>
+                                <td colspan="4" style="text-align:center;">Chargement des donnees...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CMSO Presence Data -->
+            <div class="presence-data" id="presence-cmso">
+                <h2 style="text-align: center; margin: 20px 0;">CMSO - Registre de Presence</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Prenom</th>
+                                <th>Heure d'Entree</th>
+                                <th>Heure de Sortie</th>
+                            </tr>
+                        </thead>
+                        <tbody id="presenceCmsoBody">
+                            <tr>
+                                <td colspan="4" style="text-align:center;">Chargement des donnees...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script>
+        const SHEET_ID = '1VGUm9KutnebwPBJCeOu9sa6sUY8w2kp9jEDY8u_Aj6Q';
+        const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+        
+        const DSNE_SHEET_ID = '1Oj_77Y85kIxcaVnr6U6L5ZXyuhCoS1_d1IrcymGTkTY';
+        const DSNE_CSV_URL = `https://docs.google.com/spreadsheets/d/${DSNE_SHEET_ID}/export?format=csv`;
+        
+        const CMSO_SHEET_ID = '1xE1Em9TL698GoqbJLshH-Cp8aF35-kswk8jfYnTlk0M';
+        const CMSO_CSV_URL = `https://docs.google.com/spreadsheets/d/${CMSO_SHEET_ID}/export?format=csv`;
+
+        // Navigation functionality
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all links and sections
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                
+                // Add active class to clicked link
+                this.classList.add('active');
+                
+                // Show corresponding section
+                const sectionId = this.getAttribute('data-section');
+                document.getElementById(sectionId).classList.add('active');
+                
+                // Load data based on section
+                if (sectionId === 'registre') {
+                    fetchAndDisplayData();
+                } else if (sectionId === 'presence') {
+                    fetchPresenceData('dsne');
+                }
+            });
+        });
+
+        function showPresenceData(type) {
+            // Update button states
+            document.querySelectorAll('.presence-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Hide all presence data
+            document.querySelectorAll('.presence-data').forEach(data => {
+                data.classList.remove('active');
+            });
+            
+            // Show selected presence data
+            document.getElementById(`presence-${type}`).classList.add('active');
+            
+            // Fetch data
+            fetchPresenceData(type);
+        }
+
+        async function fetchPresenceData(type) {
+            const url = type === 'dsne' ? DSNE_CSV_URL : CMSO_CSV_URL;
+            const bodyId = type === 'dsne' ? 'presenceDsneBody' : 'presenceCmsoBody';
+            const tbody = document.getElementById(bodyId);
+            
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Chargement des donnees...</td></tr>';
+
+            try {
+                const response = await fetch(url);
+                const csvText = await response.text();
+                
+                Papa.parse(csvText, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        displayPresenceData(results.data, tbody);
+                    },
+                    error: function(error) {
+                        console.error('Erreur de parsing:', error);
+                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">Erreur lors du chargement des donnees</td></tr>';
+                    }
+                });
+            } catch (error) {
+                console.error('Erreur:', error);
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">Erreur de connexion. Assurez-vous que la feuille est publiee.</td></tr>';
+            }
+        }
+
+        function displayPresenceData(data, tbody) {
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Aucune donnee disponible</td></tr>';
+                return;
+            }
+
+            // Group data by person (Nom + Prenom)
+            const groupedData = {};
+            
+            data.forEach(row => {
+                const nom = row['Nom'] || row['NOM'] || '';
+                const prenom = row['Prenom'] || row['Prénom'] || row['PRENOM'] || '';
+                const type = (row['Type'] || row['TYPE'] || '').toLowerCase();
+                const heure = row['Horodateur'] || row['Heure'] || row['HEURE'] || '';
+                
+                const key = `${nom}_${prenom}`;
+                
+                if (!groupedData[key]) {
+                    groupedData[key] = {
+                        nom: nom,
+                        prenom: prenom,
+                        entree: '',
+                        sortie: ''
+                    };
+                }
+                
+                if (type.includes('entr') || type.includes('entree')) {
+                    groupedData[key].entree = heure;
+                } else if (type.includes('sort') || type.includes('sortie')) {
+                    groupedData[key].sortie = heure;
+                }
+            });
+
+            tbody.innerHTML = '';
+            
+            Object.values(groupedData).forEach(person => {
+                const getValue = (value) => value && value.trim() !== '' ? value : 'N/A';
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><button class="data-button">${getValue(person.nom)}</button></td>
+                    <td><button class="data-button">${getValue(person.prenom)}</button></td>
+                    <td><button class="entree-button">${getValue(person.entree)}</button></td>
+                    <td><button class="sortie-button">${getValue(person.sortie)}</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function fetchAndDisplayData() {
+            const tbody = document.getElementById('dataBody');
+            tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Chargement des donnees...</td></tr>';
+
+            try {
+                const response = await fetch(CSV_URL);
+                const csvText = await response.text();
+                
+                Papa.parse(csvText, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        displayData(results.data);
+                    },
+                    error: function(error) {
+                        console.error('Erreur de parsing:', error);
+                        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; color:red;">Erreur lors du chargement des donnees</td></tr>';
+                    }
+                });
+            } catch (error) {
+                console.error('Erreur:', error);
+                tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; color:red;">Erreur de connexion. Assurez-vous que la feuille est publiee.</td></tr>';
+            }
+        }
+
+        async function displayData(data) {
+            const tbody = document.getElementById('dataBody');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;">Aucune donnee disponible</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            
+            for (let index = 0; index < data.length; index++) {
+                const row = data[index];
+                const visitId = `visit_${row['Horodateur']}_${row['Numero de Carte Visite']}`.replace(/[^a-zA-Z0-9]/g, '_');
+                
+                let statusData = null;
+                try {
+                    const stored = localStorage.getItem(visitId);
+                    if (stored) {
+                        statusData = JSON.parse(stored);
+                    }
+                } catch (error) {
+                    console.log('No stored data for:', visitId);
+                }
+                
+                const status = statusData ? statusData.status : 'en-utilisation';
+                const remiseTime = statusData ? statusData.timestamp : 'N/A';
+                
+                const service = (row['Service Visite'] || row['Service Visité'] || '').toLowerCase();
+                let carteClass = 'carte-default';
+                
+                if (service.includes('direction')) {
+                    carteClass = 'carte-direction';
+                } else if (service.includes('comptabilit')) {
+                    carteClass = 'carte-comptabilite';
+                } else if (service.includes('ressources humaines') || service.includes('rh')) {
+                    carteClass = 'carte-rh';
+                }
+                
+                const getValue = (value) => value && value.trim() !== '' ? value : 'N/A';
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><button class="data-button">${getValue(row['Horodateur'])}</button></td>
+                    <td><button class="data-button">${getValue(row['Nom de Famille'])}</button></td>
+                    <td><button class="data-button">${getValue(row['Prenom'])}</button></td>
+                    <td><button class="data-button">${getValue(row['Service Visite'] || row['Service Visité'])}</button></td>
+                    <td><button class="data-button">${getValue(row['CIN/NIF'])}</button></td>
+                    <td><button class="data-button">${getValue(row['Institution'])}</button></td>
+                    <td><button class="carte-button ${carteClass}">${getValue(row['Numero de Carte Visite'])}</button></td>
+                    <td><button class="data-button">${getValue(row['Nom de La Formation'])}</button></td>
+                    <td>
+                        <div class="status-${status}" id="status_${visitId}">
+                            ${status === 'remise' ? 'Remise' : 'En utilisation'}
+                        </div>
+                    </td>
+                    <td id="time_${visitId}">
+                        <button class="data-button">${remiseTime}</button>
+                    </td>
+                    <td>
+                        <button class="remise-button" 
+                                id="btn_${visitId}" 
+                                onclick="markAsRemise('${visitId}')"
+                                ${status === 'remise' ? 'disabled' : ''}>
+                            ${status === 'remise' ? 'Remise' : 'Remise'}
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+
+        async function markAsRemise(visitId) {
+            const now = new Date();
+            const timestamp = now.toLocaleString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            const statusData = {
+                status: 'remise',
+                timestamp: timestamp
+            };
+            
+            try {
+                localStorage.setItem(visitId, JSON.stringify(statusData));
+                console.log('Saved to storage:', visitId);
+                
+                const statusElement = document.getElementById(`status_${visitId}`);
+                const buttonElement = document.getElementById(`btn_${visitId}`);
+                const timeElement = document.getElementById(`time_${visitId}`);
+                
+                if (statusElement) {
+                    statusElement.className = 'status-remise';
+                    statusElement.textContent = 'Remise';
+                }
+                
+                if (timeElement) {
+                    timeElement.innerHTML = `<button class="data-button">${timestamp}</button>`;
+                }
+                
+                if (buttonElement) {
+                    buttonElement.disabled = true;
+                    buttonElement.textContent = 'Remise';
+                }
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde:', error);
+                alert('Erreur lors de la sauvegarde du statut: ' + error.message);
+            }
+        }
+
+        // Refresh data every 30 seconds based on active section
+        setInterval(() => {
+            if (document.getElementById('registre').classList.contains('active')) {
+                fetchAndDisplayData();
+            } else if (document.getElementById('presence').classList.contains('active')) {
+                const activeDsne = document.getElementById('presence-dsne').classList.contains('active');
+                fetchPresenceData(activeDsne ? 'dsne' : 'cmso');
+            }
+        }, 30000);
+    </script>
 </body>
 </html>
