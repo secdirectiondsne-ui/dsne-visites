@@ -491,24 +491,36 @@
             
             tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Chargement des donnees...</td></tr>';
 
+            console.log('Fetching from:', url);
+
             try {
                 const response = await fetch(url);
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const csvText = await response.text();
+                console.log('CSV text length:', csvText.length);
+                console.log('First 500 chars:', csvText.substring(0, 500));
                 
                 Papa.parse(csvText, {
                     header: true,
                     skipEmptyLines: true,
                     complete: function(results) {
+                        console.log('Parsed rows:', results.data.length);
+                        console.log('First row:', results.data[0]);
                         displayPresenceData(results.data, tbody);
                     },
                     error: function(error) {
                         console.error('Erreur de parsing:', error);
-                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">Erreur lors du chargement des donnees</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">Erreur lors du chargement des donnees. Voir console.</td></tr>';
                     }
                 });
             } catch (error) {
                 console.error('Erreur:', error);
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">Erreur de connexion. Assurez-vous que la feuille est publiee.</td></tr>';
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">Erreur: ${error.message}<br>Assurez-vous que la feuille est publiee sur le web.</td></tr>`;
             }
         }
 
