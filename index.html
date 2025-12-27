@@ -462,7 +462,15 @@
             document.querySelectorAll('.presence-button').forEach(btn => {
                 btn.classList.remove('active');
             });
-            event.target.classList.add('active');
+            
+            // Find and activate the correct button
+            const buttons = document.querySelectorAll('.presence-button');
+            buttons.forEach(btn => {
+                if ((type === 'dsne' && btn.textContent.includes('DSNE')) ||
+                    (type === 'cmso' && btn.textContent.includes('CMSO'))) {
+                    btn.classList.add('active');
+                }
+            });
             
             // Hide all presence data
             document.querySelectorAll('.presence-data').forEach(data => {
@@ -510,14 +518,32 @@
                 return;
             }
 
-            // Group data by person (Nom + Prenom)
+            // Group data by person
             const groupedData = {};
             
             data.forEach(row => {
-                const nom = row['Nom'] || row['NOM'] || '';
-                const prenom = row['Prenom'] || row['Prénom'] || row['PRENOM'] || '';
-                const type = (row['Type'] || row['TYPE'] || '').toLowerCase();
-                const heure = row['Horodateur'] || row['Heure'] || row['HEURE'] || '';
+                // Get full name from "Nom et Prénom" column
+                const nomComplet = row['Nom et Prénom'] || row['Nom et Prenom'] || '';
+                
+                // Split into nom and prenom (assuming format: "Title LASTNAME Firstname")
+                let nom = '';
+                let prenom = '';
+                
+                if (nomComplet) {
+                    // Remove titles like "Mme", "M.", "Dr." etc
+                    const cleanName = nomComplet.replace(/^(Mme|M\.|Dr\.|Mlle)\s+/i, '').trim();
+                    const parts = cleanName.split(' ');
+                    
+                    if (parts.length >= 2) {
+                        nom = parts[0]; // First word is last name
+                        prenom = parts.slice(1).join(' '); // Rest is first name
+                    } else {
+                        nom = cleanName;
+                    }
+                }
+                
+                const type = (row['Entrée ou Sortie'] || row['Entree ou Sortie'] || '').toLowerCase();
+                const heure = row['Horodateur'] || '';
                 
                 const key = `${nom}_${prenom}`;
                 
@@ -530,9 +556,9 @@
                     };
                 }
                 
-                if (type.includes('entr') || type.includes('entree')) {
+                if (type.includes('entr')) {
                     groupedData[key].entree = heure;
-                } else if (type.includes('sort') || type.includes('sortie')) {
+                } else if (type.includes('sort')) {
                     groupedData[key].sortie = heure;
                 }
             });
